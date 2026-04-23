@@ -1,1 +1,581 @@
 
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form {
+            display: none;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group input.error {
+            border-color: #dc3545;
+        }
+
+        .form-group input.success {
+            border-color: #28a745;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .password-strength {
+            margin-top: 5px;
+        }
+
+        .password-strength-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .password-strength-fill {
+            height: 100%;
+            width: 0;
+            transition: all 0.3s;
+        }
+
+        .password-strength-fill.weak {
+            width: 33%;
+            background: #dc3545;
+        }
+
+        .password-strength-fill.medium {
+            width: 66%;
+            background: #ffc107;
+        }
+
+        .password-strength-fill.strong {
+            width: 100%;
+            background: #28a745;
+        }
+
+        .password-strength-text {
+            font-size: 11px;
+            margin-top: 3px;
+            color: #6c757d;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button.submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        button.submit-btn:active {
+            transform: translateY(0);
+        }
+
+        button.submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .form-footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="login">登录</button>
+            <button class="tab" data-tab="register">注册</button>
+        </div>
+
+        <div class="form-container">
+            <div id="message" class="message"></div>
+
+            <!-- 登录表单 -->
+            <form id="loginForm" class="form active">
+                <div class="form-group">
+                    <label for="loginEmail">邮箱地址</label>
+                    <input type="email" id="loginEmail" name="email" required autocomplete="email">
+                    <div class="error-message" id="loginEmailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" name="password" required autocomplete="current-password">
+                    <div class="error-message" id="loginPasswordError"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">登录</button>
+
+                <div class="form-footer">
+                    <a href="#" id="forgotPassword">忘记密码？</a>
+                </div>
+            </form>
+
+            <!-- 注册表单 -->
+            <form id="registerForm" class="form">
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" name="username" required autocomplete="username">
+                    <div class="error-message" id="registerUsernameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">邮箱地址</label>
+                    <input type="email" id="registerEmail" name="email" required autocomplete="email">
+                    <div class="error-message" id="registerEmailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" name="password" required autocomplete="new-password">
+                    <div class="password-strength">
+                        <div class="password-strength-bar">
+                            <div class="password-strength-fill" id="passwordStrengthFill"></div>
+                        </div>
+                        <div class="password-strength-text" id="passwordStrengthText"></div>
+                    </div>
+                    <div class="error-message" id="registerPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerConfirmPassword">确认密码</label>
+                    <input type="password" id="registerConfirmPassword" name="confirmPassword" required autocomplete="new-password">
+                    <div class="error-message" id="registerConfirmPasswordError"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // XSS 防护：转义 HTML 特殊字符
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // 显示消息
+        function showMessage(text, type = 'error') {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = escapeHtml(text);
+            messageEl.className = `message ${type} show`;
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 5000);
+        }
+
+        // 邮箱验证
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // 密码强度验证
+        function validatePasswordStrength(password) {
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            if (strength <= 1) return 'weak';
+            if (strength <= 2) return 'medium';
+            return 'strong';
+        }
+
+        // 显示错误信息
+        function showError(inputId, errorId, message) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+            input.classList.add('error');
+            input.classList.remove('success');
+            error.textContent = escapeHtml(message);
+            error.classList.add('show');
+        }
+
+        // 清除错误信息
+        function clearError(inputId, errorId) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+            input.classList.remove('error');
+            error.classList.remove('show');
+        }
+
+        // 显示成功状态
+        function showSuccess(inputId, errorId) {
+            const input = document.getElementById(inputId);
+            const error = document.getElementById(errorId);
+            input.classList.remove('error');
+            input.classList.add('success');
+            error.classList.remove('show');
+        }
+
+        // 标签切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有 active 类
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+
+                // 添加 active 类到当前标签
+                this.classList.add('active');
+                const tabName = this.getAttribute('data-tab');
+                document.getElementById(`${tabName}Form`).classList.add('active');
+
+                // 清除消息
+                document.getElementById('message').classList.remove('show');
+            });
+        });
+
+        // 登录表单验证
+        document.getElementById('loginEmail').addEventListener('blur', function() {
+            const email = this.value.trim();
+            if (!email) {
+                showError('loginEmail', 'loginEmailError', '请输入邮箱地址');
+            } else if (!validateEmail(email)) {
+                showError('loginEmail', 'loginEmailError', '请输入有效的邮箱地址');
+            } else {
+                showSuccess('loginEmail', 'loginEmailError');
+            }
+        });
+
+        document.getElementById('loginPassword').addEventListener('blur', function() {
+            const password = this.value;
+            if (!password) {
+                showError('loginPassword', 'loginPasswordError', '请输入密码');
+            } else if (password.length < 6) {
+                showError('loginPassword', 'loginPasswordError', '密码长度至少为6位');
+            } else {
+                showSuccess('loginPassword', 'loginPasswordError');
+            }
+        });
+
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            let isValid = true;
+
+            // 验证邮箱
+            if (!email) {
+                showError('loginEmail', 'loginEmailError', '请输入邮箱地址');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showError('loginEmail', 'loginEmailError', '请输入有效的邮箱地址');
+                isValid = false;
+            }
+
+            // 验证密码
+            if (!password) {
+                showError('loginPassword', 'loginPasswordError', '请输入密码');
+                isValid = false;
+            } else if (password.length < 6) {
+                showError('loginPassword', 'loginPasswordError', '密码长度至少为6位');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // 这里应该发送到服务器进行验证
+                showMessage('登录功能需要连接后端API', 'success');
+                console.log('登录数据:', { email: escapeHtml(email), timestamp: new Date().toISOString() });
+            }
+        });
+
+        // 注册表单验证
+        document.getElementById('registerUsername').addEventListener('blur', function() {
+            const username = this.value.trim();
+            if (!username) {
+                showError('registerUsername', 'registerUsernameError', '请输入用户名');
+            } else if (username.length < 3) {
+                showError('registerUsername', 'registerUsernameError', '用户名长度至少为3位');
+            } else if (username.length > 20) {
+                showError('registerUsername', 'registerUsernameError', '用户名长度不能超过20位');
+            } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showError('registerUsername', 'registerUsernameError', '用户名只能包含字母、数字和下划线');
+            } else {
+                showSuccess('registerUsername', 'registerUsernameError');
+            }
+        });
+
+        document.getElementById('registerEmail').addEventListener('blur', function() {
+            const email = this.value.trim();
+            if (!email) {
+                showError('registerEmail', 'registerEmailError', '请输入邮箱地址');
+            } else if (!validateEmail(email)) {
+                showError('registerEmail', 'registerEmailError', '请输入有效的邮箱地址');
+            } else {
+                showSuccess('registerEmail', 'registerEmailError');
+            }
+        });
+
+        // 密码强度实时检测
+        document.getElementById('registerPassword').addEventListener('input', function() {
+            const password = this.value;
+            const strength = validatePasswordStrength(password);
+            const fill = document.getElementById('passwordStrengthFill');
+            const text = document.getElementById('passwordStrengthText');
+
+            fill.className = 'password-strength-fill';
+
+            if (!password) {
+                text.textContent = '';
+                return;
+            }
+
+            if (strength === 'weak') {
+                fill.classList.add('weak');
+                text.textContent = '弱：建议使用大小写字母、数字和特殊字符';
+            } else if (strength === 'medium') {
+                fill.classList.add('medium');
+                text.textContent = '中：可以更复杂一些';
+            } else {
+                fill.classList.add('strong');
+                text.textContent = '强：密码强度很好';
+            }
+        });
+
+        document.getElementById('registerPassword').addEventListener('blur', function() {
+            const password = this.value;
+            if (!password) {
+                showError('registerPassword', 'registerPasswordError', '请输入密码');
+            } else if (password.length < 8) {
+                showError('registerPassword', 'registerPasswordError', '密码长度至少为8位');
+            } else if (validatePasswordStrength(password) === 'weak') {
+                showError('registerPassword', 'registerPasswordError', '密码强度较弱，请增加复杂度');
+            } else {
+                showSuccess('registerPassword', 'registerPasswordError');
+            }
+        });
+
+        document.getElementById('registerConfirmPassword').addEventListener('blur', function() {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = this.value;
+
+            if (!confirmPassword) {
+                showError('registerConfirmPassword', 'registerConfirmPasswordError', '请确认密码');
+            } else if (password !== confirmPassword) {
+                showError('registerConfirmPassword', 'registerConfirmPasswordError', '两次输入的密码不一致');
+            } else {
+                showSuccess('registerConfirmPassword', 'registerConfirmPasswordError');
+            }
+        });
+
+        // 注册表单提交
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('registerUsername').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            let isValid = true;
+
+            // 验证用户名
+            if (!username) {
+                showError('registerUsername', 'registerUsernameError', '请输入用户名');
+                isValid = false;
+            } else if (username.length < 3) {
+                showError('registerUsername', 'registerUsernameError', '用户名长度至少为3位');
+                isValid = false;
+            } else if (username.length > 20) {
+                showError('registerUsername', 'registerUsernameError', '用户名长度不能超过20位');
+                isValid = false;
+            } else if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                showError('registerUsername', 'registerUsernameError', '用户名只能包含字母、数字和下划线');
+                isValid = false;
+            }
+
+            // 验证邮箱
+            if (!email) {
+                showError('registerEmail', 'registerEmailError', '请输入邮箱地址');
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                showError('registerEmail', 'registerEmailError', '请输入有效的邮箱地址');
+                isValid = false;
+            }
+
+            // 验证密码
+            if (!password) {
+                showError('registerPassword', 'registerPasswordError', '请输入密码');
+                isValid = false;
+            } else if (password.length < 8) {
+                showError('registerPassword', 'registerPasswordError', '密码长度至少为8位');
+                isValid = false;
+            } else if (validatePasswordStrength(password) === 'weak') {
+                showError('registerPassword', 'registerPasswordError', '密码强度较弱，请增加复杂度');
+                isValid = false;
+            }
+
+            // 验证确认密码
+            if (!confirmPassword) {
+                showError('registerConfirmPassword', 'registerConfirmPasswordError', '请确认密码');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                showError('registerConfirmPassword', 'registerConfirmPasswordError', '两次输入的密码不一致');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // 这里应该发送到服务器进行注册
+                showMessage('注册功能需要连接后端API', 'success');
+                console.log('注册数据:', {
+                    username: escapeHtml(username),
+                    email: escapeHtml(email),
+                    timestamp: new Date().toISOString()
+                });
+            }
+        });
+
+        // 忘记密码链接
+        document.getElementById('forgotPassword').addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('忘记密码功能需要连接后端API', 'success');
+        });
+    </script>
+</body>
+</html>
